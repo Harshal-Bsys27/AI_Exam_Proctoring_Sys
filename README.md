@@ -60,3 +60,13 @@ AI_Exam_Proctoring_Sys/
 - Securely handle all media streams and derived data; minimize retention and access.
 - Avoid biased or opaque decision-making. Keep a human in the loop for critical determinations.
 
+- ## Next Steps
+- Implement actual AI logic using OpenCV/MediaPipe/YOLOv8 inside the `ai_engine` module.
+- Expand schema/models as needed (e.g., exams, participants, sessions).
+- Add authentication, authorization, and audit logging when moving beyond prototypes.
+- Add tests (unit/integration) and CI.
+open cv based
+A system for exam tracking 
+and for user behaviour analysis 
+ vs code connection
+
