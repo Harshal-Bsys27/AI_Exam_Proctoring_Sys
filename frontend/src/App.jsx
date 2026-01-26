@@ -6,7 +6,7 @@ export default function App() {
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: 16 }}>
       <h1>AI Exam Proctoring (Prototype)</h1>
       <p>Webcam and browser state monitoring demo.</p>
-      <WebcamMonitor wsUrl="ws://localhost:8000/ws/proctor" />
+      <WebcamMonitor wsUrl="ws://127.0.0.1:8000/ws/proctor" />
     </div>
   );
 }
