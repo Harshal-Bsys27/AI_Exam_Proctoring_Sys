@@ -6,11 +6,14 @@ import React, { useEffect, useRef, useState } from 'react';
  * - Requests webcam via getUserMedia and shows a muted preview.
  * - Connects to a backend WebSocket to send browser events.
  * - Observes tab visibility changes and fullscreen entry/exit.
+ * - Captures frames and sends to backend for face detection.
  */
 export default function WebcamMonitor({ wsUrl }) {
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const wsRef = useRef(null);
   const [connected, setConnected] = useState(false);
+  const [faceStatus, setFaceStatus] = useState('UNKNOWN');
 
   // Request webcam access
   useEffect(() => {
@@ -77,6 +80,40 @@ export default function WebcamMonitor({ wsUrl }) {
     };
   }, []);
 
+  // Face detection
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (videoRef.current && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        ctx.drawImage(videoRef.current, 0, 0);
+
+        // Convert to base64
+        const imageData = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+        try {
+          const response = await fetch('http://localhost:8000/detect_face', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData }),
+          });
+          const result = await response.json();
+          setFaceStatus(result.status);
+          // Send face status via WebSocket
+          if (wsRef.current && wsRef.current.readyState === 1) {
+            wsRef.current.send(JSON.stringify({ type: 'face_status', status: result.status, face_count: result.face_count, ts: Date.now() }));
+          }
+        } catch (err) {
+          console.error('Face detection failed', err);
+        }
+      }
+    }, 1000); // Every second
+
+    return () => clearInterval(interval);
+  }, []);
+
   const enterFullscreen = async () => {
     try {
       await document.documentElement.requestFullscreen();
@@ -98,7 +135,11 @@ export default function WebcamMonitor({ wsUrl }) {
       <div>
         <strong>WS:</strong> {connected ? 'connected' : 'disconnected'}
       </div>
+      <div>
+        <strong>Face Status:</strong> {faceStatus}
+      </div>
       <video ref={videoRef} autoPlay playsInline muted style={{ width: 480, background: '#111' }} />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={enterFullscreen}>Start Monitoring (Enter Fullscreen)</button>
         <button onClick={exitFullscreen}>Stop Monitoring (Exit Fullscreen)</button>
