@@ -8,14 +8,20 @@ Provides:
 
 import base64
 import io
+import sys
+import os
 from fastapi import FastAPI, HTTPException
 import cv2
 import numpy as np
 
+# Add the parent directory to sys.path to allow importing from ai_engine
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from .database import Base, engine
 from . import models
 from .websocket import register_websocket
-from ..ai_engine.face_detection import FacePresenceDetector
+from ai_engine.face_detection import FacePresenceDetector
+from fastapi.middleware.cors import CORSMiddleware
 
 
 def create_app() -> FastAPI:
@@ -27,6 +33,15 @@ def create_app() -> FastAPI:
 
     # Initialize face detector
     face_detector = FacePresenceDetector()
+
+    # Enable CORS for the frontend development server
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://localhost:5174"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -58,7 +73,7 @@ def create_app() -> FastAPI:
             face_count = face_detector.detect_faces(frame)
             status = face_detector.evaluate_presence(face_count)
 
-            return {"status": status, "face_count": face_count}
+            return {"status": status, "face_count": str(face_count)}
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
