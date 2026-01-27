@@ -21,6 +21,7 @@ from .database import Base, engine
 from . import models
 from .websocket import register_websocket
 from ai_engine.face_detection import FacePresenceDetector
+from ai_engine.gaze_estimation import estimate_gaze
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -73,7 +74,10 @@ def create_app() -> FastAPI:
             face_count = face_detector.detect_faces(frame)
             status = face_detector.evaluate_presence(face_count)
 
-            return {"status": status, "face_count": str(face_count)}
+            # Estimate gaze
+            gaze = estimate_gaze(frame)
+
+            return {"status": status, "face_count": str(face_count), "gaze": gaze}
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
