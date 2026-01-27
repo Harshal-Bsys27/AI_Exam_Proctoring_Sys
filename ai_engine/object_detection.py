@@ -1,13 +1,46 @@
-"""Prohibited object detection stub (e.g., phones, notes, extra displays).
+"""Prohibited object detection using YOLOv8.
 
-Intended behavior:
-- Use a general object detector (e.g., YOLOv8) to identify prohibited items.
-- Return a list of detected class names or structured detections.
-
-Implementation notes:
-- Replace stub with `ultralytics` YOLOv8 inference and postprocessing.
-- Consider custom class lists and confidence thresholds.
+Detects prohibited items like phones, books, etc.
 """
+
+from typing import List
+import numpy as np
+from ultralytics import YOLO
+
+# Load YOLOv8 model (nano for speed)
+model = YOLO('yolov8n.pt')  # Will download if not present
+
+# Prohibited classes (COCO dataset classes)
+PROHIBITED_CLASSES = {
+    67: 'cell phone',  # COCO class for cell phone
+    73: 'book',        # book
+    63: 'laptop',      # laptop
+    62: 'tv',          # tv/monitor
+    # Add more as needed
+}
+
+
+def detect_prohibited_items(frame: np.ndarray) -> List[str]:
+    """Detect prohibited items from a frame using YOLOv8.
+
+    Args:
+        frame: A single video frame as a NumPy array (BGR).
+
+    Returns:
+        A list of detected prohibited item labels.
+    """
+    results = model(frame, conf=0.5)  # Confidence threshold
+    
+    detected = []
+    for result in results:
+        for box in result.boxes:
+            class_id = int(box.cls.item())
+            if class_id in PROHIBITED_CLASSES:
+                label = PROHIBITED_CLASSES[class_id]
+                if label not in detected:
+                    detected.append(label)
+    
+    return detected
 
 from typing import List
 

@@ -15,6 +15,7 @@ export default function WebcamMonitor({ wsUrl }) {
   const [connected, setConnected] = useState(false);
   const [faceStatus, setFaceStatus] = useState('UNKNOWN');
   const [gaze, setGaze] = useState('unknown');
+  const [prohibitedItems, setProhibitedItems] = useState([]);
 
   // Request webcam access
   useEffect(() => {
@@ -103,9 +104,10 @@ export default function WebcamMonitor({ wsUrl }) {
           const result = await response.json();
           setFaceStatus(result.status);
           setGaze(result.gaze);
+          setProhibitedItems(result.prohibited_items);
           // Send face status via WebSocket
           if (wsRef.current && wsRef.current.readyState === 1) {
-            wsRef.current.send(JSON.stringify({ type: 'face_status', status: result.status, face_count: result.face_count, gaze: result.gaze, ts: Date.now() }));
+            wsRef.current.send(JSON.stringify({ type: 'face_status', status: result.status, face_count: result.face_count, gaze: result.gaze, prohibited_items: result.prohibited_items, ts: Date.now() }));
           }
         } catch (err) {
           console.error('Face detection failed', err);
@@ -142,6 +144,9 @@ export default function WebcamMonitor({ wsUrl }) {
       </div>
       <div>
         <strong>Gaze:</strong> {gaze}
+      </div>
+      <div>
+        <strong>Prohibited Items:</strong> {prohibitedItems.length > 0 ? prohibitedItems.join(', ') : 'None'}
       </div>
       <video ref={videoRef} autoPlay playsInline muted style={{ width: 480, background: '#111' }} />
       <canvas ref={canvasRef} style={{ display: 'none' }} />

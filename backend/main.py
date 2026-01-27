@@ -22,6 +22,7 @@ from . import models
 from .websocket import register_websocket
 from ai_engine.face_detection import FacePresenceDetector
 from ai_engine.gaze_estimation import estimate_gaze
+from ai_engine.object_detection import detect_prohibited_items
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -77,7 +78,10 @@ def create_app() -> FastAPI:
             # Estimate gaze
             gaze = estimate_gaze(frame)
 
-            return {"status": status, "face_count": str(face_count), "gaze": gaze}
+            # Detect prohibited items
+            prohibited_items = detect_prohibited_items(frame)
+
+            return {"status": status, "face_count": str(face_count), "gaze": gaze, "prohibited_items": prohibited_items}
 
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
