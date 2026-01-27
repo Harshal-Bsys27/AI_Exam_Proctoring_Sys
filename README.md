@@ -1,6 +1,6 @@
 # AI-Based Online Exam Proctoring System
 
-AI_Exam_Proctoring_Sys is a resume-quality, minimal yet production-like scaffold for an AI-powered online exam proctoring system. It includes a FastAPI backend with WebSocket support, a React + Vite frontend that accesses a webcam and monitors browser state, a stubbed AI engine layer (OpenCV/MediaPipe/YOLOv8 placeholders), and SQLite storage via SQLAlchemy.
+AI_Exam_Proctoring_Sys is a  minimal yet production-like scaffold for an AI-powered online exam proctoring system. It includes a FastAPI backend with WebSocket support, a React + Vite frontend that accesses a webcam and monitors browser state, a stubbed AI engine layer (OpenCV/MediaPipe/YOLOv8 placeholders), and SQLite storage via SQLAlchemy.
 
 This repository focuses on clean structure, typed Python stubs, and clear TODOs rather than full ML implementations.
 
